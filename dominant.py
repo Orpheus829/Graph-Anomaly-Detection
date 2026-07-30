@@ -30,8 +30,7 @@ def solve_dominant(adj_mx: np.ndarray, t_signal: np.ndarray, epoch: int = 100, h
 
 def build_signal_window(df, frame_idx: int, corrupted_signal: np.ndarray, w: int = 12) -> np.ndarray:
     """
-    Builds a (N, w) feature window ending at frame_idx, using clean history
-    for the first w-1 frames and the corrupted signal as the last column.
+    Builds a (N, w) feature window ending at frame_idx, using clean history for the first w-1 frames and the corrupted signal as the last column.
     Falls back to repeating the corrupted signal if frame_idx < w-1.
     """
     N = corrupted_signal.shape[0]
@@ -54,7 +53,7 @@ def build_signal_window(df, frame_idx: int, corrupted_signal: np.ndarray, w: int
 
 if __name__ == "__main__":
     from data import load_traffic_data, load_adjacency_matrix, build_sweep_config
-    from evaluation import evaluate_single_config  # or whatever your existing AUROC/F1 fn is named
+    from evaluation import evaluate_single_config  
     import config
 
     df = load_traffic_data(config.DATA_PATH)

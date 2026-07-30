@@ -27,10 +27,9 @@ def run_streaming_experiment() -> Dict[str, List[Any]]:
     print("INITIALIZING STREAMING EXPERIMENT (METR-LA)")
     print("=" * 60)
 
-    # Ensure output directory exists for saving benchmarks
     os.makedirs(config.RESULTS_DIR, exist_ok=True)
 
-    # 1. Load data and construct graph topology
+    # 1. Data loading and construct graph topology
     print(f"Loading traffic data from {config.DATA_PATH}...")
     df = load_traffic_data(config.DATA_PATH)
     
@@ -59,7 +58,7 @@ def run_streaming_experiment() -> Dict[str, List[Any]]:
     warm_converged_flags: List[bool] = []
     cold_converged_flags: List[bool] = []
 
-    # State persistence memory for the Warm-Start arm
+    # Persistence memory for the Warm-Start arm
     x_warm_prev = None
     e_warm_prev = None
 
@@ -67,7 +66,7 @@ def run_streaming_experiment() -> Dict[str, List[Any]]:
     start_time = time.time()
 
     for t_idx in range(n_frames):
-        # Extract the current temporal frame across all 207 sensors
+        # Extraction of the current temporal frame across all 207 sensors
         t_signal = df.iloc[t_idx].values.astype(np.float64)/100.0  # Normalization for numerical stability  
 
         # -------------------------------------------------------------
@@ -88,7 +87,7 @@ def run_streaming_experiment() -> Dict[str, List[Any]]:
             e_init=e_warm_prev
         )
 
-        # Update persistent memory for the next frame's warm start
+        # Update of persistent memory for the next frame's warm start
         x_warm_prev = x_w.copy()
         e_warm_prev = e_w.copy()
 
@@ -128,7 +127,7 @@ def run_streaming_experiment() -> Dict[str, List[Any]]:
     total_elapsed = time.time() - start_time
     print(f"\nStreaming experiment completed in {total_elapsed:.2f} seconds.")
 
-    # Compute comparative summary statistics
+    # Computation of comparative summary statistics
     mean_warm_iters = float(np.mean(warm_iters_list))
     mean_cold_iters = float(np.mean(cold_iters_list))
     speedup_factor = mean_cold_iters / max(mean_warm_iters, 1.0)
@@ -155,7 +154,6 @@ def run_streaming_experiment() -> Dict[str, List[Any]]:
         'cold_converged': np.array(cold_converged_flags)
     }
 
-    # Save metrics to disk so plotting modules can load them instantly
     output_filepath = os.path.join(config.RESULTS_DIR, 'streaming_metrics.npz')
     np.savez(output_filepath, **results)
     print(f"Metrics successfully saved to {output_filepath}")

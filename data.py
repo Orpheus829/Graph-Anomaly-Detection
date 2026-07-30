@@ -105,7 +105,7 @@ def inject_blob(signal, adj_mx, center_node, magnitude, local_std=None, n_neigh=
 
 def calc_local_std(df, window_size = 100):
     std = df.iloc[:window_size].std(axis = 0).values.astype(np.float64)
-    std = np.clip(std, 1e-6, None)  # avoid zero std
+    std = np.clip(std, 1e-6, None)  # to avoid zero std
     return std   # To compute local std for each sensor, using the first `window_size` frames of the data.
 
 
@@ -155,7 +155,7 @@ def build_sweep_config(df, adj_mx, frame_idx, magnitudes = Magnitudes, spike_nod
                 'labels': labels_spike,
                 'injected_nodes': [spike_node]
             })
-            
+
             # blob config
             blob_center = blob_centers[i % len(blob_centers)]
             corrupted_blob, labels_blob, blob_nodes = inject_blob(clean, adj_mx, blob_center, mag, local_std, n_neigh)

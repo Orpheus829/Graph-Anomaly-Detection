@@ -3,7 +3,7 @@ Evaluation Module for Graph-LCA Anomaly Detection
 Covers two distinct evaluation tracks:
   1. Streaming benchmark  — warm vs cold iteration counts, convergence rates, residuals
   2. Magnitude sweep      — AUROC, F1, Precision, Recall per magnitude per anomaly type
-     This is the core paper result: a curve, not a single number.
+    This is the core result: a curve, not a single number.
 """
 
 import os
@@ -72,7 +72,6 @@ def print_streaming_report(stats: dict) -> None:
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Track 2 — Magnitude Sweep Evaluation
-# This is the main detection result Ameer asked for.
 # ─────────────────────────────────────────────────────────────────────────────
 
 def anomaly_scores_from_e(e: np.ndarray) -> np.ndarray:
@@ -105,7 +104,7 @@ def evaluate_single_config(e_lca: np.ndarray, labels: np.ndarray) -> dict:
         auroc = 0.5
         ap    = float(labels.mean())
 
-    # For F1/Precision/Recall use a simple threshold: mean + 2*std of scores
+    # For F1/Precision/Recall use a threshold of : mean + 2*std of scores
     thresh  = scores.mean() + 2.0 * scores.std()
     preds   = (scores > thresh).astype(int)
     gt      = labels.astype(int)

@@ -110,11 +110,11 @@ if __name__ == '__main__':
     df = load_traffic_data("metr-la.parquet")
     adj_mx = load_adjacency_matrix("adj_mx.pkl")
     L_real = build_laplacian(adj_mx)
-    t_real = df.iloc[5000].values.astype(np.float64) / 100.0   # pick any real frame
+    t_real = df.iloc[5000].values.astype(np.float64) / 100.0   
 
     x_opt, e_opt, steps, is_converged, _, _ = lca_ode_solver( t_signal=t_real, L=L_real, alpha=1.0, lam=0.1, gamma=0.0, tau=1.0, dt=0.001, max_iters=50000, tol=1e-5)
     results_real = run_correctness_check(t_real, L_real, 1.0, 0.0, 0.1, x_opt, e_opt, is_converged)
-    
+
     print(f"1. Converged Flags   | CVXPY: {results_real['cvxpy_converged']} | LCA: {results_real['lca_converged']}")
     print(f"2. Objective Gap     | {results_real['objective_gap']:.6e}")
     print(f"3. Constraint Resid. | CVXPY: {results_real['cvxpy_residual']:.6f} | LCA: {results_real['lca_residual']:.6f}")

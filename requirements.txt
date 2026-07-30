@@ -1,0 +1,27 @@
+# Core numerical / data stack
+numpy>=1.26
+pandas>=2.2
+scipy>=1.11
+
+# Graph construction & visualization
+networkx>=3.2
+
+# Plotting
+matplotlib>=3.8
+
+# Metrics (AUROC, AP, F1, precision, recall)
+scikit-learn>=1.4
+
+# Convex baselines (Graph TV, Matrix RPCA) and correctness checks
+cvxpy>=1.4
+
+# --- Optional: only required for the DOMINANT deep-learning baseline (dominant.py)
+# These bring in a heavy torch/PyG/PyGOD stack and are NOT needed to run
+# data.py, lca.py, baselines.py, streaming.py, evaluation.py, plotting.py, or run_sweep.py.
+# Install if wanting to run dominant.py:
+torch>=2.2
+torch_geometric>=2.5
+pygod>=1.1
+
+# Parquet I/O backend for pandas.read_parquet (used by data.py)
+pyarrow>=14.0

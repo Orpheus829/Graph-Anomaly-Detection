@@ -18,19 +18,17 @@ from evaluation import evaluate_magnitude_sweep, print_sweep_report
 from plotting import plot_baseline_comparison
 
 # ── Sweep scope ─────────────────────────────────────────────────────────
-# RPCA needs a full N x T matrix per config (context window + corrupted
-# frame), which makes it the expensive part of this loop. Keep the frame
-# count small first to confirm everything wires together, then scale up.
+# RPCA needs a full N x T matrix per config (context window + corrupted frame), which makes it the expensive part of this loop. 
+# We keep the frame count small first to confirm everything wires together, then scale up.
+
 N_SWEEP_FRAMES = 10          # number of distinct frame_idx to sweep over
 RPCA_WINDOW    = 30          # clean context frames used to build RPCA's matrix
-RUN_RPCA_SWEEP = False        # set False to skip RPCA (Graph TV alone is a valid result per Ameer)
+RUN_RPCA_SWEEP = False        # setting False to skip RPCA (to prevent runtime bottleneck)
 
 
 def run_rpca_on_config(df, adj_mx, cfg, window=RPCA_WINDOW):
     """
-    Builds a [N x (window+1)] matrix of clean context frames plus the
-    corrupted frame as the last column, runs RPCA once, and returns the
-    anomaly vector (E's last column) for that config's frame.
+    Builds a [N x (window+1)] matrix of clean context frames plus the corrupted frame as the last column, runs RPCA once, and returns the anomaly vector (E's last column) for that config's frame.
     """
     t = cfg['frame_idx']
     start = max(0, t - window)
@@ -47,12 +45,10 @@ def main():
     adj_mx = load_adjacency_matrix(config.ADJ_PATH)
     L = build_laplacian(adj_mx)
 
-    # Fixed, evenly spaced frame indices — chosen independent of injected
-    # labels, per Ameer's "don't tune against labels" rule.
+    # Fixed, evenly spaced frame indices — chosen independent of injected labels.
     rng = np.random.default_rng(config.SEED)
     frame_idx = sorted(rng.choice(
-        np.arange(200, len(df) - 200), size=N_SWEEP_FRAMES, replace=False
-    ).tolist())
+        np.arange(200, len(df) - 200), size=N_SWEEP_FRAMES, replace=False).tolist())
     print(f"Sweeping over frames: {frame_idx}")
 
     configs = build_sweep_config(df, adj_mx, frame_idx, magnitudes=config.MAGNITUDES)
@@ -64,7 +60,7 @@ def main():
         key = (cfg['type'], cfg['magnitude'], cfg['frame_idx'])
         t_signal = cfg['corrupted_signal'].astype(np.float64) / 100.0
 
-        # LCA (your core method)
+        # LCA (core method)
         _, e_lca, iters, converged, residual, _ = lca_ode_solver(
             t_signal, L,
             alpha=config.ALPHA, lam=config.LAMBDA, gamma=config.GAMMA,

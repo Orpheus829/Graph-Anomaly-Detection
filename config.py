@@ -24,7 +24,7 @@ TOL            = 1e-5   # convergence tolerance — same for warm and cold
 N_FRAMES       = 200         # number of frames for streaming experiment
 
 # ── Evaluation ────────────────────────────────────────────────────────────
-ANOMALY_THRESHOLD = None     # if None, use AUROC (threshold-free)
+ANOMALY_THRESHOLD = None     # if None, AUROC (threshold-free)
 
 # ----Correctness Checks (small-scale)----
 CORRECTNESS_CHECK_EVERY = 20   # run cvxpy correctness check every N frames when RUN_CVXPY_BASELINE=True
