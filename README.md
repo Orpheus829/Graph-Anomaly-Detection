@@ -143,11 +143,7 @@ length; `RUN_CVXPY_BASELINE` / `RUN_COLD_START_LCA` are execution toggles.
 
 ## Known gaps 
 
-- `CORRECTNESS_CHECK_EVERY` / `RUN_CVXPY_BASELINE` are declared in `config.py`
-  but not currently read by `streaming.py` — the periodic correctness check
-  implied by those settings isn't wired into the streaming loop yet.
-- `plotting.plot_magnitude_sweep()` is implemented but not called from
-  `run_sweep.py` (no `results/magnitude_sweep.png` is produced).
-- `dominant.py` is not yet integrated into `run_sweep.py`'s baseline
-  comparison — it runs standalone only.
+- `CORRECTNESS_CHECK_EVERY` / `RUN_CVXPY_BASELINE` are declared in `config.py` but not currently read by `streaming.py` — the periodic correctness check implied by those settings isn't wired into the streaming loop yet.
+- `plotting.plot_magnitude_sweep()` is implemented but not called from `run_sweep.py` (no `results/magnitude_sweep.png` is produced).
+- `dominant.py` is not yet integrated into `run_sweep.py`'s baseline comparison — it runs standalone only.
 - `RUN_RPCA_SWEEP = False` by default in `run_sweep.py`, so RPCA is implemented but not exercised in the full sweep unless toggled on.
