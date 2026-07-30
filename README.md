@@ -36,27 +36,26 @@ min_{x,e}  ½‖t - x - e‖² + (α/2) xᵀLx + λ‖e‖₁ + (γ/2) eᵀLe
 ```
 GAD/
 ├── config.py          Central hyperparameters, paths, execution toggles
-├── data.py             Data/adjacency loading, Laplacian construction,
-│                        spike/blob anomaly injection, sweep config builder
+|
+├── data.py             Data/adjacency loading, Laplacian construction, spike/blob anomaly injection, sweep config builder
+│                    
 ├── lca.py              Core LCA ODE solver (joint QP) + objective function
+|
 ├── baselines.py         Graph Total Variation and Matrix RPCA (cvxpy)
-├── dominant.py          DOMINANT (PyGOD) deep-learning baseline — standalone,
-│                        kept separate to isolate the torch/PyG dependency stack
-├── correctness.py       Validates LCA output against a CVXPY ground-truth
-│                        solve (objective gap, residuals) — standalone script
-├── streaming.py         Frame-by-frame streaming experiment: warm-start vs.
-│                        cold-start iteration counts / convergence / residuals
-├── evaluation.py        Metric computation: streaming stats, and AUROC/AP/F1/
-│                        precision/recall aggregated per anomaly magnitude
-├── plotting.py           Figure generation: streaming plot, magnitude-sweep
-│                        curves, baseline-comparison plots
-├── run_sweep.py         Orchestrator: builds sweep configs, runs LCA + Graph TV
-│                        (+ optional RPCA), evaluates, and plots comparisons
-├── visualize.py          Standalone sensor-network layout visualization
-├── metr-la.parquet      Raw METR-LA traffic signal data (207 sensors)
-├── adj_mx.pkl           Sensor adjacency matrix
-├── metr-la_graph.png    Pre-rendered sensor network visualization
-└── results/             Generated plots and metric archives (.png / .npz)
+|
+├── dominant.py          DOMINANT (PyGOD) deep-learning baseline — standalone, kept separate to isolate the torch/PyG dependency stack
+|
+├── correctness.py       Validates LCA output against a CVXPY ground-truth solve (objective gap, residuals) — standalone script
+|
+├── streaming.py         Frame-by-frame streaming experiment: warm-start vs cold-start iteration counts / convergence / residuals
+│                        
+├── evaluation.py        Metric computation: streaming stats, and AUROC/AP/F1/ precision/recall aggregated per anomaly magnitude
+│                        
+├── plotting.py           Figure generation: streaming plot, magnitude-sweep curves, baseline-comparison plots
+│                        
+├── run_sweep.py         Orchestrator: builds sweep configs, runs LCA + Graph TV (+ optional RPCA), evaluates, and plots comparisons
+│                        
+└── visualize.py          Standalone sensor-network layout visualization
 ```
 
 ## Dataset
