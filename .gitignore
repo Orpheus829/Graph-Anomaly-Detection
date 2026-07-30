@@ -21,3 +21,12 @@ logs/
 Thumbs.db
 
 *.pkl
+
+# Dataset
+adj_mx.pkl
+
+# Temporary/generated figures
+metr-la_graph.png
+
+# Keep architecture figure
+!Anomaly Detection Pipeline.png
