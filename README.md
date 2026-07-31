@@ -136,10 +136,10 @@ All generated figures and metric archives are written to `results/`.
 
 ## Configuration (`config.py`)
 
-Key parameters: `ALPHA` / `LAMBDA` / `GAMMA` / `TAU` / `DT` / `MAX_ITER` /
-`TOL` control the LCA solver; `MAGNITUDES` and `BLOB_SIZE` control anomaly
-injection strength/spread; `N_FRAMES` controls the streaming experiment
-length; `RUN_CVXPY_BASELINE` / `RUN_COLD_START_LCA` are execution toggles.
+Key parameters: `ALPHA` / `LAMBDA` / `GAMMA` / `TAU` / `DT` / `MAX_ITER` /`TOL` control the LCA solver; 
+                `MAGNITUDES` and `BLOB_SIZE` control anomaly injection strength/spread; 
+                `N_FRAMES` controls the streaming experiment length; 
+                `RUN_CVXPY_BASELINE` / `RUN_COLD_START_LCA` are execution toggles.
 
 ## Known gaps 
 
