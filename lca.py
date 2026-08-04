@@ -119,3 +119,34 @@ def lca_ode_solver(
     objective = compute_objective(x, e, t_signal, L, alpha, gamma, lam)
 
     return x, e, iters, converged, residual, objective
+
+
+if __name__ == "__main__":
+    print("Running LCA ODE solver standalone smoke test...")
+
+    # Small synthetic graph — sanity check only, not the real correctness
+    # comparison (see correctness.py for the actual cvxpy validation)
+    N = 20
+    rng = np.random.default_rng(42)
+    A = rng.random((N, N))
+    A = (A + A.T) / 2.0
+    A[A < 0.7] = 0
+    np.fill_diagonal(A, 0)
+
+    d = A.sum(axis=1)
+    d_inv_sqrt = np.where(d > 0, 1.0 / np.sqrt(d), 0.0)
+    D_inv_sqrt = np.diag(d_inv_sqrt)
+    L = np.eye(N) - D_inv_sqrt @ A @ D_inv_sqrt
+
+    t_signal = rng.normal(0, 1, N)
+    t_signal[3] += 5.0  # inject an obvious spike
+
+    x, e, iters, converged, residual, obj = lca_ode_solver(
+        t_signal, L, alpha=1.0, lam=0.1, gamma=0.0,
+        tau=1.0, dt=0.001, max_iters=20000, tol=1e-5
+    )
+
+    print(f"Converged: {converged} | Iterations: {iters}")
+    print(f"Constraint residual: {residual:.6f} | Objective: {obj:.6f}")
+    print(f"Anomaly detected at injected node (3): {abs(e[3]):.4f}")
+    print(f"Sparse anomaly count (|e|>1e-3): {(np.abs(e) > 1e-3).sum()}/{N}")

@@ -13,24 +13,30 @@ from typing import Tuple
 import cvxpy as cp
 
 
-def solve_graph_tv(t_signal: np.ndarray, L: np.ndarray, alpha: float = 1.0, beta: float = 0.1) -> Tuple[np.ndarray, np.ndarray]:
+def solve_graph_tv(t_signal: np.ndarray, W: np.ndarray, beta: float = 0.1) -> Tuple[np.ndarray, np.ndarray]:
     """
-    Graph Total Variation baseline (Chen et al.)
-    minimize  0.5*||t - x - e||^2 + (alpha/2) * x^T L x + beta * ||e||_1
+    Graph Total Variation equation
+    minimize_x  0.5*||t - x||^2 + beta * sum_{(i,j) in E} w_ij * |x_i - x_j|
     Anomaly score = residual t - x
 
-    Same convex problem as the gamma=0 special case of our joint QP, but solved as a batch QP (cvxpy) rather than the LCA circuit — this is the real "graph TV" comparison, not a Tikhonov smoother.
-    
-    L needs to be symmetric PSD Laplacian
+    Args:
+        t_signal: (N,) signal for this frame
+        W: (N,N) symmetric, thresholded edge-weight matrix (NOT the Laplacian)
+        beta: TV regularization strength
+    Returns:
+        x_est: (N,) denoised/smoothed signal
+        anomaly_score: (N,) = |t_signal - x_est|, non-negative
+        
     """
 
     N = len(t_signal)
+    rows, cols = np.nonzero(np.triu(W, k=1))
+    weights = W[rows, cols]
+    
     x = cp.Variable(N)
-    e = cp.Variable(N)
-    # L is a PSD but cvxpy's DCP
-    # L's minimum eigenvalue is ~0 up to fp oise, not actually negative
-    L_psd = cp.psd_wrap(L + np.eye(N) * 1e-8)
-    objective = cp.Minimize(0.5 * cp.sum_squares(t_signal - x - e) + (alpha/2) * cp.quad_form(x, L_psd) + beta * cp.norm1(e))
+    edge_diff = x[rows] - x[cols]
+    tv_penalty = beta * cp.sum(cp.multiply(weights, cp.abs(edge_diff)))
+    objective = cp.Minimize(0.5 * cp.sum_squares(t_signal - x) + tv_penalty)
     problem = cp.Problem(objective)
     
     try:
@@ -39,8 +45,8 @@ def solve_graph_tv(t_signal: np.ndarray, L: np.ndarray, alpha: float = 1.0, beta
         problem.solve(solver=cp.SCS, verbose=False)
 
     x_est = x.value if x.value is not None else np.copy(t_signal)
-    e_est = e.value if e.value is not None else np.zeros_like(t_signal)
-    return x_est, e_est
+    anomaly_score = np.abs(t_signal - x_est)
+    return x_est, anomaly_score
 
 
 def solve_matrix_rpca(M: np.ndarray, lam_s: float = 0.1) -> Tuple[np.ndarray, np.ndarray]:
@@ -90,14 +96,16 @@ if __name__ == "__main__":
         df = pd.read_parquet("metr-la.parquet")
         adj_mx = load_adjacency_matrix("adj_mx.pkl")
             
-        L = build_laplacian(adj_mx)
+        W = (adj_mx + adj_mx.T) / 2.0
+        W[W < 0.1] = 0
         
         # Test Graph TV on a single frame vector
         sample_signal = df.iloc[0].values.astype(np.float64) / 100.0
-        bg, anom = solve_graph_tv(sample_signal, L)
-        n_flag = int((np.abs(anom) > 1e-4).sum())
+        bg, anom = solve_graph_tv(sample_signal, W)
+        n_flag = int((anom > 1e-3).sum())
         print(f"[SUCCESS] Graph TV baseline executed. Output shape: {bg.shape}")
-        print(f"  Sparse anomaly check: {n_flag}/{len(anom)} nodes flagged")
+        print(f"  Anomaly score range: [{anom.min():.4f}, {anom.max():.4f}]")
+        print(f"  Nodes above 1e-3 threshold: {n_flag}/{len(anom)}")
         
         # Test Matrix RPCA on a small temporal window (e.g., 208 nodes x 50 time steps)
         sample_matrix = df.iloc[:50].values.T.astype(np.float64) / 100.0

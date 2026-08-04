@@ -15,7 +15,7 @@ from data import load_traffic_data, load_adjacency_matrix, build_laplacian, buil
 from lca import lca_ode_solver
 from baselines import solve_graph_tv, solve_matrix_rpca
 from evaluation import evaluate_magnitude_sweep, print_sweep_report
-from plotting import plot_baseline_comparison
+from plotting import plot_baseline_comparison, plot_magnitude_sweep
 
 # ── Sweep scope ─────────────────────────────────────────────────────────
 # RPCA needs a full N x T matrix per config (context window + corrupted frame), which makes it the expensive part of this loop. 
@@ -23,7 +23,7 @@ from plotting import plot_baseline_comparison
 
 N_SWEEP_FRAMES = 10          # number of distinct frame_idx to sweep over
 RPCA_WINDOW    = 30          # clean context frames used to build RPCA's matrix
-RUN_RPCA_SWEEP = False        # setting False to skip RPCA (to prevent runtime bottleneck)
+RUN_RPCA_SWEEP = True        # setting False to skip RPCA (to prevent runtime bottleneck)
 
 
 def run_rpca_on_config(df, adj_mx, cfg, window=RPCA_WINDOW):
@@ -44,11 +44,12 @@ def main():
     df = load_traffic_data(config.DATA_PATH)
     adj_mx = load_adjacency_matrix(config.ADJ_PATH)
     L = build_laplacian(adj_mx)
+    W = (adj_mx + adj_mx.T) / 2.0
+    W[W < 0.1] = 0
 
     # Fixed, evenly spaced frame indices — chosen independent of injected labels.
     rng = np.random.default_rng(config.SEED)
-    frame_idx = sorted(rng.choice(
-        np.arange(200, len(df) - 200), size=N_SWEEP_FRAMES, replace=False).tolist())
+    frame_idx = sorted(rng.choice( np.arange(200, len(df) - 200), size=N_SWEEP_FRAMES, replace=False).tolist())
     print(f"Sweeping over frames: {frame_idx}")
 
     configs = build_sweep_config(df, adj_mx, frame_idx, magnitudes=config.MAGNITUDES)
@@ -71,10 +72,10 @@ def main():
             print(f"  [warn] LCA did not converge for {key} (residual={residual:.4f})")
 
         # Graph TV baseline
-        _, e_tv = solve_graph_tv(t_signal, L, alpha=config.ALPHA, beta=config.LAMBDA)
+        _, e_tv = solve_graph_tv(t_signal, W, beta=config.LAMBDA)
         graphtv_results[key] = e_tv
 
-        # RPCA baseline (expensive — optional)
+        # RPCA baseline 
         if RUN_RPCA_SWEEP:
             e_rpca = run_rpca_on_config(df, adj_mx, cfg)
             rpca_results[key] = e_rpca
@@ -88,6 +89,8 @@ def main():
 
     # ── Evaluate ────────────────────────────────────────────────────────
     curves_lca = evaluate_magnitude_sweep(configs, lca_results)
+    plot_magnitude_sweep(curves_lca, output_path="results/magnitude_sweep_lca.png")
+
     curves_tv  = evaluate_magnitude_sweep(configs, graphtv_results)
     method_curves = {"LCA": curves_lca, "Graph TV": curves_tv}
 

@@ -104,7 +104,7 @@ if __name__ == '__main__':
 
     
     # Now on a real METR-LA frame to check correctness on a real graph
-    print("\n--- Running on REAL METR-LA graph (Ameer's Priority 1) ---")
+    print("\n--- Running on REAL METR-LA graph (Priority 1) ---")
     from data import load_traffic_data, load_adjacency_matrix, build_laplacian
 
     df = load_traffic_data("metr-la.parquet")
